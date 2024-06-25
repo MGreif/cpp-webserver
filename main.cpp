@@ -152,66 +152,8 @@ int main(int argc, char** argv) {
             // Cleanup
             delete request;
             receiver->destroy();
-
-            break;       
-            char * socket_buffer_clone = new char[512];
-            char * responseBuffer = new char[1028];
-            strcpy(socket_buffer_clone, socket_buffer);
-            //cout << "Received: " << socket_buffer << " " << ok << endl;
-
-            char * newLinePtr;
-            int line = 0;
-            while((newLinePtr = strchr(socket_buffer_clone, '\n'))) {
-                *newLinePtr = '\0';
-                char currentLine[512];
-                strcpy(currentLine, socket_buffer_clone);
-                char * restOfLine = newLinePtr + 1;
-                strcpy(socket_buffer_clone, restOfLine);
-                cout << line << ": " << currentLine << endl;
-
-                if (line == 0) {
-                    if (strncmp(currentLine, "GET /A", 6) == 0) {
-                        cout << "GET A" << endl;
-                        strcpy(responseBuffer, "HTTP/1.1 200 OK\nDate: Sun, 10 Oct 2010 23:26:07 GMT\nServer: Apache/2.2.8 (Ubuntu) mod_ssl/2.2.8 OpenSSL/0.9.8g\nLast-Modified: Sun, 26 Sep 2010 22:04:35 GMT\nETag: \"45b6-834-49130cc1182c0\"\nAccept-Ranges: bytes\nContent-Length: 12\nConnection: close\nContent-Type: text/html\n\n<b>NOICE</b>\n\n");
-                    }
-                    if (strncmp(currentLine, "GET /B", 6) == 0) {
-                        cout << "GET B" << endl;
-                        strcpy(responseBuffer, "HTTP/1.1 200 OK\nDate: Sun, 10 Oct 2010 23:26:07 GMT\nServer: Apache/2.2.8 (Ubuntu) mod_ssl/2.2.8 OpenSSL/0.9.8g\nLast-Modified: Sun, 26 Sep 2010 22:04:35 GMT\nETag: \"45b6-834-49130cc1182c0\"\nAccept-Ranges: bytes\nContent-Length: 12\nConnection: close\nContent-Type: text/html\n\n<b>Hallo Belli</b>\n\n");
-                    }
-                }
-
-                line++;
-            }
-
-
-
-
-            send(socket_fd, responseBuffer, strlen(responseBuffer), 0);
-            /*
-            char * ptr = strchr(socket_buffer,'\n');
-            if (ptr != NULL) {
-                *ptr = '\0';
-            }
-            */
-            //cout << "Received: " << socket_buffer << " " << ok << endl;
-            memset(socket_buffer, '\0', sizeof(socket_buffer));
-            break;
-            /*
-            cout << "Input: ";
-            cin >> input_buffer;
-            ptr = strchr(input_buffer,'\n');
-            if (ptr != NULL) {
-                *(ptr+1) = '\0';
-            }
-
-            send(socket_fd, input_buffer, strlen(input_buffer), 0);
-            */
             
         }
-        cout << endl;
-        continue;
     }
-
-
     return 0;
 }
