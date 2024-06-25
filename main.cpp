@@ -5,7 +5,6 @@
 #include <sys/socket.h>
 #include <signal.h>
 #include "webserver.h"
-using namespace std;
 
 // Overwriting defaults
 #ifdef WEBSERVER_DEFAULT_DEFINITIONS
@@ -20,6 +19,9 @@ using namespace std;
 #define REQUEST_HEADER_VALUE_LENGTH 512
 #define RESPONSE_BUFFER_SIZE 1024
 #endif
+
+using namespace std;
+
 
 enum HTTPMethod {
     GET,
