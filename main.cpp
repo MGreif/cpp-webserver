@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
             char hK[] = "TEST";
             char hV[] = "A!@#";
             Header testHeader = Header(hK, hV);
-            char body[512] = "<em>NOIIIIIICECEE</em>";
+            char body[512] = "<em>It Works ...</em>";
             r->headers->addHeader(&testHeader);
             strncpy(r->body, body, sizeof(body));
             
