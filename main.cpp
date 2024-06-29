@@ -118,18 +118,18 @@ int main(int argc, char **argv)
 
     signal(SIGINT, interrupt_event);
 
-    while ((socket_fd = accept(soc_fd, &client, client_len)))
+    while ((socket_fd = accept(soc_fd, &client, client_len)) != -1)
     {
         cout << "Connection accepted ..." << endl;
         client_socket = socket_fd;
 
-        RequestReceiver *receiver;
+        RequestReceiver receiver = RequestReceiver();
         // TODO: Inject request pointer into RequestReceiver. Let the receiver fill the request.
         // Also maybe adjust this code, to use only one request receiver
-        while ((receiver = RequestReceiver::receive(new RequestReceiver(), client_socket)) != NULL)
+        while (receiver.receive(&client_socket) > 0)
         {
 
-            char *fullRequest = receiver->getFullRequestString();
+            char *fullRequest = receiver.getFullRequestString();
             if (fullRequest == nullptr)
             {
                 break;
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
             {
             }
 
-            Request *request = new Request(receiver->id);
+            Request *request = new Request(receiver.id);
             Request::buildFromString(request, fullRequest);
 
             printf("%ld: Method: %s \n", request->id, request->getMethod());
@@ -167,11 +167,11 @@ int main(int argc, char **argv)
             strncpy(r->body, body, sizeof(body));
 
             rt.transmit(r);
-            close(client_socket);
 
             // Cleanup
             delete request;
-            receiver->destroy();
+            receiver.close_connection();
+            // receiver.destroy();
         }
     }
     return 0;

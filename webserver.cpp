@@ -210,46 +210,51 @@ long RequestReceiver::getRequestEnd()
 }
 
 // Allocate chunks in heap and fill chunks with request data
-RequestReceiver *RequestReceiver::receive(RequestReceiver *r, int socket)
+int RequestReceiver::receive(int *socket)
 {
     int ok;
-
+    cout << *socket << endl;
+    if (socket == nullptr || *socket == 0 || *socket == -1)
+    {
+        return 0;
+    }
+    this->client_socket = socket;
     char tempBuffer[chunkSize];
-    while ((ok = recv(socket, tempBuffer, chunkSize, 0)))
+    while ((ok = recv(*socket, tempBuffer, chunkSize, 0)))
     {
         if (ok == -1)
         {
-            cout << r->id << ": Error receiving" << endl;
+            cout << this->id << ": Error receiving" << endl;
             printf("Error: %s \n", strerror(errno));
-            return r;
+            return -1;
         }
         cout << "Read: " << ok << " Bytes" << endl;
-        int currentChunk = r->chunkCounter;
-        char *nextChunkPointer = r->getNextChunkPointer();
+        int currentChunk = this->chunkCounter;
+        char *nextChunkPointer = this->getNextChunkPointer();
         if (nextChunkPointer == nullptr)
         {
-            cout << r->id << ": Failed to get next chunk pointer. Returning ..." << endl;
-            return r;
+            cout << this->id << ": Failed to get next chunk pointer. Returning ..." << endl;
+            return -1;
         }
 
         memcpy(nextChunkPointer, tempBuffer, chunkSize);
         memset(tempBuffer, '\0', chunkSize);
 
-        printf("%ld: Working at chunkindex: %d \n", r->id, currentChunk);
+        printf("%ld: Working at chunkindex: %d \n", this->id, currentChunk);
 
-        long requestEndOffset = r->getRequestEnd();
+        long requestEndOffset = this->getRequestEnd();
         if (requestEndOffset != 0)
         {
-            printf("%ld: End of request detected in chunk %d... \n", r->id, currentChunk);
-            long requestEndOffsetInCurrentChunk = requestEndOffset % r->chunkSize;
-            printf("%ld: requestEndOffset in current chunk: %ld \n", r->id, requestEndOffsetInCurrentChunk);
+            printf("%ld: End of request detected in chunk %d... \n", this->id, currentChunk);
+            long requestEndOffsetInCurrentChunk = requestEndOffset % this->chunkSize;
+            printf("%ld: requestEndOffset in current chunk: %ld \n", this->id, requestEndOffsetInCurrentChunk);
             *(nextChunkPointer + requestEndOffsetInCurrentChunk) = '\0';
-            r->requestFinished = true;
-            r->requestEndOffset = requestEndOffset;
-            return r;
+            this->requestFinished = true;
+            this->requestEndOffset = requestEndOffset;
+            return requestEndOffset;
         }
     }
-    return r;
+    return 0;
 };
 char *RequestReceiver::getFullRequestString()
 {
@@ -278,6 +283,18 @@ void RequestReceiver::destroy()
     cout << this->id << ": Deleting fullRequestPointer" << endl;
 
     delete[] fullRequestPointer;
+}
+
+void RequestReceiver::close_connection()
+{
+    if (this->client_socket == nullptr)
+    {
+        cout << "Client socket not initialized or already closed" << endl;
+    }
+    close(*this->client_socket);
+    cout << "Closing socket connection: " << this->client_socket << endl;
+    *this->client_socket = 0;
+    this->client_socket = nullptr;
 }
 
 void getStatusCodeMapping(char *out, int size, int statusCode)
